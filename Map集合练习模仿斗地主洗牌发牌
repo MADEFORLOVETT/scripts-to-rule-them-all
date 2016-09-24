@@ -1,0 +1,146 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Set;
+
+public class Poker {
+
+	public static void main(String[] args) {
+		//定义两个字符窜数组,用于存储花色和数字
+		String[] colors={"红桃","梅花","黑桃","方块"};
+		String[] numbers={"3","4","5","6","7","8","9","10","J","Q","K","A","2"};
+		//定义Map集合用于存储牌和每张牌的编号,list用于存储编号
+		HashMap<Integer,String> pokerMap=new HashMap<Integer,String>();
+		ArrayList<Integer> pokerNumber=new ArrayList<Integer>();
+		int pokerIndex=0;
+		//双重for循环将花色和数字组合成牌并存入集合中,将编号存入list中
+		for(String stNumbers:numbers)
+		{
+			for(String stColors:colors)
+			{
+				pokerMap.put(pokerIndex, stColors+stNumbers);
+				pokerNumber.add(pokerIndex);
+				pokerIndex++;
+			} 
+		}
+		pokerMap.put(52, "小王");
+		pokerMap.put(53, "大王");
+		pokerNumber.add(52);
+		pokerNumber.add(53);
+		//洗牌
+		Collections.shuffle(pokerNumber);
+		//用随机数Random找出明牌,做为地主的依据
+		int landlordPoker=0;
+		Random pokerRan=new Random();
+		int getPokerRan=pokerRan.nextInt(54);
+		//定义三个变量用于存储最后三张牌
+		int lastOnePoker=0;
+		int lastTwoPoker=0;
+		int lastThreePoker=0;
+		//将最后三张牌分别付给lastOnePoker,lastTwoPoker,lastThreePoker三个变量
+		for(int i=51;i<pokerNumber.size();i++)
+		{
+			if(i%3==0)
+			   lastOnePoker=pokerNumber.get(i);
+			else if(i%3==1)
+			   lastTwoPoker=pokerNumber.get(i);
+			else
+			   lastThreePoker=pokerNumber.get(i);
+		}
+		//如果随机数不存在于最后三张牌的任意一张,那么得到地主牌;如果存在,就重新得到随机数继续判断
+		while(true)
+		{			
+			if(getPokerRan!=lastOnePoker && getPokerRan!=lastTwoPoker && getPokerRan!=lastThreePoker)
+			{
+				landlordPoker=getPokerRan;
+				break;
+			}
+			else
+			{
+				getPokerRan=pokerRan.nextInt(54);				
+			}
+		}		
+		//发牌
+		//定义三个玩家集合和一个底牌集合
+		ArrayList<Integer> player1=new ArrayList<Integer>();
+		ArrayList<Integer> player2=new ArrayList<Integer>();
+		ArrayList<Integer> player3=new ArrayList<Integer>();
+		ArrayList<Integer> bottom=new ArrayList<Integer>();
+		//实现分牌
+		for(int i=0;i<pokerNumber.size();i+=3)
+		{
+			if(i<51)
+			{
+				player1.add(pokerNumber.get(i));
+				player2.add(pokerNumber.get(i+1));
+				player3.add(pokerNumber.get(i+2));
+			}
+			else
+			{
+				bottom.add(pokerNumber.get(i));
+				bottom.add(pokerNumber.get(i+1));
+				bottom.add(pokerNumber.get(i+2));
+			}
+		}
+		//调用getLandLordName方法,输出地主名
+		getLandLordName(player1,pokerMap,landlordPoker,"成龙");
+		getLandLordName(player2,pokerMap,landlordPoker,"甄子丹");
+		getLandLordName(player3,pokerMap,landlordPoker,"李连杰");
+		//调用方法getPoker实现发牌,看牌
+		getPoker(player1,pokerMap,landlordPoker,"成    龙",lastOnePoker,lastTwoPoker,lastThreePoker);
+		getPoker(player2,pokerMap,landlordPoker,"甄子丹",lastOnePoker,lastTwoPoker,lastThreePoker);
+		getPoker(player3,pokerMap,landlordPoker,"李连杰",lastOnePoker,lastTwoPoker,lastThreePoker);
+		lookPoker(bottom,pokerMap,"底    牌");
+	}
+
+	public static void getPoker(ArrayList<Integer> pokerNumber,HashMap<Integer,String> pokerMap,int landlordPoker,String name,int...intPoker)
+	{
+		//先对分好牌的玩家牌进行排序,然后查找是否有地主牌
+		Collections.sort(pokerNumber);
+		int getNumber=Collections.binarySearch(pokerNumber, landlordPoker);
+		//如果有就将底牌加入其中,如果没有直接看牌
+		if(getNumber>0)
+		{
+		   if(landlordPoker==pokerNumber.get(getNumber))
+		   {		   
+			   for(int i=0;i<intPoker.length;i++)
+				   pokerNumber.add(intPoker[i]);
+			   Collections.sort(pokerNumber);
+			   lookPoker(pokerNumber,pokerMap,name);			
+		   }
+		}
+		   else
+		   {
+			   lookPoker(pokerNumber,pokerMap,name);
+		   }
+	}
+	public static void lookPoker(ArrayList<Integer> pokerNumber,HashMap<Integer,String> pokerMap,String name)
+	{
+		//增强for循环对玩家的牌进行遍历,实现看牌
+		System.out.print(name+": ");
+		for(Integer inte:pokerNumber)
+		{
+			System.out.print(pokerMap.get(inte)+" ");
+		}
+		System.out.print("\n");
+	}
+	
+	public static void getLandLordName(ArrayList<Integer> pokerNumber,HashMap<Integer,String> pokerMap,int landlordPoker,String name)
+	{
+		////先对分好牌的玩家牌进行排序,然后查找是否有地主牌
+		Collections.sort(pokerNumber);
+		int getNumber=Collections.binarySearch(pokerNumber, landlordPoker);
+		//如果有,就输出地主的名字
+		if(getNumber>0)
+		{
+		   if(landlordPoker==pokerNumber.get(getNumber))
+		   {		   
+			   System.out.println("地主:"+name);	
+		   }
+		}
+		   
+	}
+	
+
+}
